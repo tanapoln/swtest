@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+	<class name="com.example.swtest.entity.UserEntity" table="test_gid_entity">
+		<id name="id" type="int" column="gid">
+			<generator class="org.hibernate.id.IdentityGenerator">
+				<param name="collection">1000</param>
+			</generator>
+		</id>
+		<property name="name" type="string" column="name" />
+	</class>
+</hibernate-mapping>
