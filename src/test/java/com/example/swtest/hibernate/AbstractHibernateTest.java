@@ -7,8 +7,8 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.junit.Before;
 
+import java.sql.Connection;
 import java.util.Properties;
-import java.util.function.Consumer;
 
 /**
  * The type Abstract hibernate test.
@@ -40,7 +40,7 @@ public class AbstractHibernateTest {
      *
      * @param closure the closure
      */
-    protected void withTx(Consumer<Session> closure) {
+    protected void withTx(Fn<Session> closure) {
         try (Session session = sessionFactory.openSession()) {
             session.setFlushMode(FlushMode.AUTO);
             session.setDefaultReadOnly(false);
@@ -49,6 +49,8 @@ public class AbstractHibernateTest {
             try {
                 tx = session.beginTransaction();
                 closure.accept(session);
+            } catch (Throwable throwable) {
+                throw new RuntimeException(throwable);
             } finally {
                 if (tx != null) {
                     tx.commit();
@@ -70,10 +72,16 @@ public class AbstractHibernateTest {
         properties.put("hibernate.connection.url", "jdbc:hsqldb:mem:test");
         properties.put("hibernate.connection.username", "sa");
         properties.put("hibernate.connection.password", "");
+        properties.put("hibernate.connection.isolation", String.valueOf(Connection.TRANSACTION_READ_COMMITTED));
+        properties.put("hibernate.connection.hsqldb.tx", "MVCC");
 
         return new Configuration().addProperties(properties)
                 .addFile(Thread.currentThread().getContextClassLoader().getResource("com/example/swtest/hibernate/hibernate.xml").getFile())
                 .buildSessionFactory();
+    }
+
+    public interface Fn<T> {
+        public void accept(T t) throws Throwable;
     }
 
 }
